@@ -1,0 +1,97 @@
+[
+  {
+    "ContainingType": "RestaurantReservations.Controllers.ReservationsController",
+    "Method": "GetAllReservations",
+    "RelativePath": "api/Reservations",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "RestaurantReservations.Controllers.ReservationsController",
+    "Method": "CreateReservation",
+    "RelativePath": "api/Reservations",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "reservation",
+        "Type": "RestauranteFinal.Models.Reservation",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "RestaurantReservations.Controllers.ReservationsController",
+    "Method": "GetReservationById",
+    "RelativePath": "api/Reservations/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "RestaurantReservations.Controllers.ReservationsController",
+    "Method": "UpdateReservation",
+    "RelativePath": "api/Reservations/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "reservation",
+        "Type": "RestauranteFinal.Models.Reservation",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "RestaurantReservations.Controllers.ReservationsController",
+    "Method": "SoftDeleteReservation",
+    "RelativePath": "api/Reservations/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "RestaurantReservations.Controllers.ReservationsController",
+    "Method": "GetReservationsByDate",
+    "RelativePath": "api/Reservations/search",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "date",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
