@@ -1,6 +1,8 @@
 /RestauranteFinal/.vs/
-/RestauranteFinal/TMS/bin/
-/RestauranteFinal/TMS/obj/
+/RestauranteFinal/RestauranteFinal/bin/
+/RestauranteFinal/RestauranteFinal/obj/
+/RestauranteFinal/RestauranteFinal/obj/Debug
+RestauranteFinal/RestauranteFinal/obj/
 /RestauranteFinal/XunitTest/bin/
 /RestauranteFinal/XunitTest/obj/
 /RestauranteFinal/publish/
