@@ -2,9 +2,9 @@
 /RestauranteFinal/RestauranteFinal/bin/
 /RestauranteFinal/RestauranteFinal/obj/
 /RestauranteFinal/RestauranteFinal/obj/Debug
-RestauranteFinal/RestauranteFinal/obj/
-/RestauranteFinal/XunitTest/bin/
-/RestauranteFinal/XunitTest/obj/
+7RestauranteFinal/RestauranteFinal/obj/
+/RestauranteFinal/RestauranteTestes/bin/
+/RestauranteFinal/RestauranteTestes/obj/
 /RestauranteFinal/publish/
 /RestauranteFinal/.vagrant/
 /RestauranteFinal/RestauranteFinal/.vagrant/
@@ -12,3 +12,4 @@ RestauranteFinal/RestauranteFinal/Dockerfile_BACKUP_1640
 RestauranteFinal/RestauranteFinal/Dockerfile_BASE_1640
 RestauranteFinal/RestauranteFinal/Dockerfile_LOCAL_1640
 RestauranteFinal/RestauranteFinal/Dockerfile_REMOTE_1640
+RestauranteFinal/RestauranteFinal/obj/
