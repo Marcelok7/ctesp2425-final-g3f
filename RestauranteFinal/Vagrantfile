@@ -1,0 +1,23 @@
+Vagrant.configure("2") do |config|
+  # Box
+  config.vm.box = "gusztavvargadr/sql-server"
+
+  # Configurações do provedor Hyper-V
+  config.vm.provider "hyperv" do |hv|
+    # Configuração de memória
+    hv.memory = 2048
+    # Configuração de CPU (opcional, ajuste conforme necessário)
+    hv.cpus = 2
+  end
+
+  # Redirecionamento de portas
+  config.vm.network "forwarded_port", guest: 1433, host: 1234
+
+  # Configuração de rede privada (opcional, descomente se necessário)
+  # config.vm.network "private_network", type: "dhcp"
+  
+  #config.vm.network "private_network", type: "dhcp", bridge: "ExternalSwitch"
+  config.vm.network "private_network", type: "dhcp", bridge: "VagrantSwitch"
+  
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+end
