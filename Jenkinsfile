@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        VAGRANT_DIR = "RestauranteFinal/Vagrantfile"
+        VAGRANT_DIR = "RestauranteFinal/"
         DATABASE_URL = "jdbc:mysql://192.168.1.164:3306/Reservations"
         DATABASE_USER = "sa"
         DATABASE_PASSWORD = "Teste123!"
