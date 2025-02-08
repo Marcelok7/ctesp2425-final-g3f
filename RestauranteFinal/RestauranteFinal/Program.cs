@@ -25,13 +25,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configuração do banco de dados SQL Server
 builder.Services.AddDbContext<ReservationContext>(options =>
-    options.UseInMemoryDatabase("TestDatabase")
-);
-
-/*builder.Services.AddDbContext<ReservationContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))); // REMOVENDO O COMENTÁRIO ERRADO*/
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 

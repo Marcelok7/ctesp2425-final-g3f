@@ -1,0 +1,8 @@
+.vagrant/
+.git/
+.github/
+*.md
+Dockerfile
+.vs/
+obj/
+bin/
