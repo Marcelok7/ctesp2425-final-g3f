@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: restaurante-api
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - jenkins
+      - sonarqube
+
+  jenkins:
+    container_name: jenkinsRestaurante
+    image: jenkins/jenkins:lts
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+    restart: unless-stopped
+
+  sonarqube:
+    container_name: sonarqubeRestaurante
+    image: sonarqube:lts
+    ports:
+      - "9000:9000"
+      - "9092:9092"
+    environment:
+      SONARQUBE_JDBC_URL: jdbc:postgresql://db:5432/sonar
+      SONARQUBE_JDBC_USERNAME: sonar
+      SONARQUBE_JDBC_PASSWORD: sonar
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    container_name: sonarqube-db
+    image: postgres:15
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB: sonar
+    volumes:
+      - sonarqube_db:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  jenkins_data:
+  sonarqube_db:
