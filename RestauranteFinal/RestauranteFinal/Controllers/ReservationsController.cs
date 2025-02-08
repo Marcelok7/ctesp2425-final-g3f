@@ -45,8 +45,25 @@ namespace RestaurantReservations.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateReservation([FromBody] Reservation reservation)
         {
+            // Calcular o horário de término da nova reserva
+            var startTime = reservation.ReservationDate;
+            var endTime = startTime.Add(reservation.ReservationTime);
+
+            // Verificar se já existe uma reserva para a mesma mesa dentro do horário
+            bool conflictExists = await _context.Reservations
+                .Where(r => r.TableNumber == reservation.TableNumber && !r.IsDeleted)
+                .AnyAsync(r =>
+                    (r.ReservationDate < endTime && r.ReservationDate.Add(r.ReservationTime) > startTime));
+
+            if (conflictExists)
+            {
+                return BadRequest("Já existe uma reserva para esta mesa neste horário.");
+            }
+
+            // Adicionar e salvar nova reserva
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetReservationById), new { id = reservation.Id }, reservation);
         }
 
