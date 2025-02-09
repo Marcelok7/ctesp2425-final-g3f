@@ -1,54 +1,13 @@
-pipeline {
-    agent any
-
-    environment {
-        DOCKER_IMAGE = "restaurante-api"
+node {
+  stage('SCM') {
+    checkout scm
+  }
+  stage('SonarQube Analysis') {
+    def scannerHome = tool 'SonarScanner for MSBuild'
+    withSonarQubeEnv() {
+      sh "dotnet ${scannerHome}/SonarScanner.MSBuild.Common.dll begin /k:\"restaurante-api-5\""
+      sh "dotnet build"
+      sh "dotnet ${scannerHome}/SonarScanner.MSBuild.Common.dll end"
     }
-
-    stages {
-        stage('Checkout do Código') {
-            steps {
-                git branch: 'main', url: 'https://github.com/Marcelok7/ctesp2425-final-g3f.git'
-            }
-        }
-
-        stage('Compilação e Testes') {
-            steps {
-                sh 'mvn clean package'
-                sh 'mvn test'
-            }
-        }
-
-        stage('Análise de Qualidade com SonarQube') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh 'mvn sonar:sonar'
-                }
-            }
-        }
-
-        stage('Construção da Imagem Docker') {
-            steps {
-                sh 'docker build -t $DOCKER_IMAGE .'
-            }
-        }
-
-        stage('Deploy com Docker') {
-            steps {
-                sh '''
-                docker-compose down
-                docker-compose up -d
-                '''
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline executado com sucesso!'
-        }
-        failure {
-            echo 'Erro no pipeline!'
-        }
-    }
+  }
 }
