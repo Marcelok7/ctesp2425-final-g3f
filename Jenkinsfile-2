@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout do Código') {
             steps {
-                git branch: 'main', url: 'https://github.com/Marcelok7/ctesp2425-final-g3f.git'
+                git branch: 'dev_marco', url: 'https://github.com/Marcelok7/ctesp2425-final-g3f.git'
             }
         }
 
