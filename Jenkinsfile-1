@@ -12,17 +12,31 @@ pipeline {
             }
         }
 
+        stage('Restaurar Pacotes') {
+            steps {
+                sh 'dotnet restore'
+            }
+        }
+
         stage('Compilação e Testes') {
             steps {
-                sh 'mvn clean package'
-                sh 'mvn test'
+                sh 'dotnet build --configuration Release'
+                sh 'dotnet test --configuration Release --logger "trx;LogFileName=test-results.trx"'
+            }
+            post {
+                always {
+                    // Publicar resultados dos testes
+                    junit '/*/test-results.trx'
+                }
             }
         }
 
         stage('Análise de Qualidade com SonarQube') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh 'mvn sonar:sonar'
+                    sh 'dotnet sonarscanner begin /k:"restaurante-api" /d:sonar.login="${SONARQUBE_TOKEN}"'
+                    sh 'dotnet build'
+                    sh 'dotnet sonarscanner end /d:sonar.login="${SONARQUBE_TOKEN}"'
                 }
             }
         }
