@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools { 
+        dotnetsdk 'dotnet8'
+    }
+
     environment {
         DOCKER_IMAGE = "restaurante-api"
     }
@@ -9,19 +13,29 @@ pipeline {
         stage('Checkout do Código') {
             steps {
                 git branch: 'dev_marco', url: 'https://github.com/Marcelok7/ctesp2425-final-g3f.git'
+                echo "Código verificado"
             }
         }
 
         stage('Restaurar Pacotes') {
             steps {
-                sh 'dotnet restore'
+                script {
+                    def workspace = pwd()
+                    echo "Diretório de trabalho: ${workspace}"
+                    sh "dotnet --info"
+                    sh "dotnet restore ${workspace}/YourSolutionName.sln"
+                }
+                echo "Pacotes restaurados"
             }
         }
 
         stage('Compilação e Testes') {
             steps {
-                sh 'dotnet build --configuration Release'
-                sh 'dotnet test --configuration Release --logger "trx;LogFileName=test-results.trx"'
+                script {
+                    def workspace = pwd()
+                    sh "dotnet build ${workspace}/YourSolutionName.sln --configuration Release"
+                    sh "dotnet test ${workspace}/YourSolutionName.sln --configuration Release --logger 'trx;LogFileName=test-results.trx'"
+                }
             }
             post {
                 always {
@@ -34,9 +48,12 @@ pipeline {
         stage('Análise de Qualidade com SonarQube') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh 'dotnet sonarscanner begin /k:"restaurante-api" /d:sonar.login="${SONARQUBE_TOKEN}"'
-                    sh 'dotnet build'
-                    sh 'dotnet sonarscanner end /d:sonar.login="${SONARQUBE_TOKEN}"'
+                    script {
+                        def workspace = pwd()
+                        sh "dotnet sonarscanner begin /k:'restaurante-api' /d:sonar.login='${SONARQUBE_TOKEN}'"
+                        sh "dotnet build ${workspace}/YourSolutionName.sln"
+                        sh "dotnet sonarscanner end /d:sonar.login='${SONARQUBE_TOKEN}'"
+                    }
                 }
             }
         }
