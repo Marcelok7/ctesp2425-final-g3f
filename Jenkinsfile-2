@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "restaurante-api"
+    }
+
+    stages {
+        stage('Checkout do Código') {
+            steps {
+                git branch: 'dev_marco', url: 'https://github.com/Marcelok7/ctesp2425-final-g3f.git'
+                echo "Código verificado"
+            }
+        }
+
+        stage('Construir Imagem Docker') {
+            steps {
+                script {
+                    def workspace = pwd()
+                    sh "docker build -t $DOCKER_IMAGE ."
+                }
+                echo "Imagem Docker construída"
+            }
+        }
+
+        stage('Executar Testes') {
+            steps {
+                script {
+                    sh "docker run --rm $DOCKER_IMAGE dotnet test --logger 'trx;LogFileName=test-results.trx'"
+                }
+            }
+            post {
+                always {
+                    // Publicar resultados dos testes
+                    junit '*/**/test-results.trx'
+                }
+            }
+        }
+
+        stage('Deploy com Docker') {
+            steps {
+                script {
+                    sh '''
+                    docker-compose down
+                    docker-compose up -d
+                    '''
+                }
+                echo "Deploy realizado com sucesso"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline executado com sucesso!'
+        }
+        failure {
+            echo 'Erro no pipeline!'
+        }
+    }
+}
