@@ -1,59 +1,55 @@
 pipeline {
     agent any
 
-
-    tools { 
-        dotnetsdk 'dotnet8'
+    environment {
+        SONAR_HOST_URL = 'http://192.168.56.1:9000'  // Substitua pela URL do seu servidor SonarQube
     }
 
-
     stages {
-        // Limpeza do Workspace
-        stage ('Clean workspace') {
-            steps {
-                cleanWs()
-            }
-        }
-
-        // Checkout do código
-        stage('Code Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/Marcelok7/ctesp2425-final-g3f.git'
-                echo "Code Checked out"
-            }
-        }
-
-        // Restore da aplicação
-        stage('Restore App') {
+        stage('Prepare SonarQube Scanner') {
             steps {
                 script {
-                    def workspace = pwd()
-                    sh "dotnet restore ${workspace}/RestauranteFinal.sln"
+                    // Configuração do SonarQube Scanner
+                    def scannerHome = tool name: 'SonarQube Scanner for Jenkins', type: 'Plugin'
+
+                    // Definindo a variável do scanner no ambiente
+                    env.SONAR_SCANNER_HOME = scannerHome
                 }
-                echo "Restored App"
             }
         }
 
-        // Build da aplicação
-        stage('Build App') {
+        stage('Run SonarQube Scanner') {
             steps {
                 script {
-                    def workspace = pwd()
-                    sh "dotnet build ${workspace}/RestauranteFinal.sln --configuration Release"
+                    // Usando as credenciais corretamente
+                    withCredentials([string(credentialsId: 'sonarqube-token-3', variable: 'SONAR_TOKEN')]) {
+                        // Executar o SonarQube Scanner com as propriedades fornecidas
+                        sh """
+                            ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                                -Dsonar.projectKey=restaurante-api-3 \
+                                -Dsonar.projectName=restaurante-api-3 \
+                                -Dsonar.projectVersion=1.0 \
+                                -Dsonar.language=cs \
+                                -Dsonar.tests=RestauranteFinal/RestauranteTestes/ \
+                                -Dsonar.sources=RestauranteFinal/RestauranteFinal/ \
+                                -Dsonar.login=${SONAR_TOKEN} \
+                                -Dsonar.host.url=${SONAR_HOST_URL}
+                        """
+                    }
                 }
-                echo "Built App"
             }
         }
+    }
 
-        // Publish da aplicação
-        stage('Publish App') {
-            steps {
-                script {
-                    def workspace = pwd()
-                    sh "dotnet publish ${workspace}/RestauranteFinal.sln --configuration Release --output ${workspace}/publish"
-                }
-                echo "Published App"
-            }
+    post {
+        always {
+            echo 'Pipeline finalizada!'
+        }
+        success {
+            echo 'Análise do SonarQube concluída com sucesso!'
+        }
+        failure {
+            echo 'Falha na execução da análise do SonarQube.'
         }
     }
 }

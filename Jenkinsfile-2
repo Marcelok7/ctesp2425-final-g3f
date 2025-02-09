@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+
+    // Configuração do plugin .NET SDK Support
+    tools { 
+        dotnetsdk 'dotnet8'
+    }
+
+    // Configuração dos vários stages
+    stages {
+        // Limpeza do Workspace
+        stage ('Clean workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+
+        // Checkout do código
+        stage('Code Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Marcelok7/ctesp2425-final-g3f.git'
+                echo "Code Checked out"
+            }
+        }
+
+        // Restore da aplicação
+        stage('Restore App') {
+            steps {
+                script {
+                    def workspace = pwd()
+                    sh "dotnet restore ${workspace}/YourSolutionName.sln"
+                }
+                echo "Restored App"
+            }
+        }
+
+        // Build da aplicação
+        stage('Build App') {
+            steps {
+                script {
+                    def workspace = pwd()
+                    sh "dotnet build ${workspace}/YourSolutionName.sln --configuration Release"
+                }
+                echo "Built App"
+            }
+        }
+
+        // Publish da aplicação
+        stage('Publish App') {
+            steps {
+                script {
+                    def workspace = pwd()
+                    sh "dotnet publish ${workspace}/YourSolutionName.sln --configuration Release --output ${workspace}/publish"
+                }
+                echo "Published App"
+            }
+        }
+    }
+}
