@@ -50,10 +50,11 @@ namespace RestaurantReservations.Controllers
             var endTime = startTime.Add(reservation.ReservationTime);
 
             // Verificar se já existe uma reserva para a mesma mesa dentro do horário
-            bool conflictExists = await _context.Reservations
-                .Where(r => r.TableNumber == reservation.TableNumber && !r.IsDeleted)
-                .AnyAsync(r =>
-                    (r.ReservationDate < endTime && r.ReservationDate.Add(r.ReservationTime) > startTime));
+            bool conflictExists = _context.Reservations
+             .Where(r => r.TableNumber == reservation.TableNumber && !r.IsDeleted)
+             .AsEnumerable() // Transforma os dados em memória (Ineficiente para grandes tabelas!)
+             .Any(r =>
+         (r.ReservationDate < endTime && r.ReservationDate.Add(r.ReservationTime) > startTime));
 
             if (conflictExists)
             {
