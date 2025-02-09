@@ -1,56 +1,59 @@
 pipeline {
     agent any
-    
-    environment {
-        // Token global do SonarQube (deve ser configurado no Jenkins como um secret)
-        SONAR_TOKEN = credentials('sonarqube-token-3')  // Substitua 'sonarqube-token-3' pelo ID do seu secret no Jenkins
-        SONAR_HOST_URL = 'http://192.168.56.1:9000'  // Substitua pela URL do seu servidor SonarQube
+
+
+    tools { 
+        dotnetsdk 'dotnet8'
     }
-    
+
+
     stages {
-        stage('Prepare SonarQube Scanner') {
+        // Limpeza do Workspace
+        stage ('Clean workspace') {
             steps {
-                script {
-                    // Configuração do SonarQube Scanner
-                    def scannerHome = tool name: 'SonarQube Scanner', type: 'Tool'
-                    
-                    // Configurações de autenticação e definição de variáveis de ambiente
-                    env.SONAR_SCANNER_HOME = scannerHome
-                    env.SONAR_TOKEN = credentials('sonarqube-token-3')
-                    env.SONAR_HOST_URL = 'http://192.168.56.1:9000'
-                }
+                cleanWs()
             }
         }
-        
-        stage('Run SonarQube Scanner') {
+
+        // Checkout do código
+        stage('Code Checkout') {
             steps {
-                script {
-                    // Executar o SonarQube Scanner com as propriedades fornecidas
-                    sh """
-                        ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
-                            -Dsonar.projectKey=restaurante-api-3 \
-                            -Dsonar.projectName=restaurante-api-3 \
-                            -Dsonar.projectVersion=1.0 \
-                            -Dsonar.language=cs \
-                            -Dsonar.tests=RestauranteFinal/RestauranteTestes/ \
-                            -Dsonar.sources=RestauranteFinal/RestauranteFinal/ \
-                            -Dsonar.login=${SONAR_TOKEN} \
-                            -Dsonar.host.url=${SONAR_HOST_URL}
-                    """
-                }
+                git branch: 'main', url: 'https://github.com/Marcelok7/ctesp2425-final-g3f.git'
+                echo "Code Checked out"
             }
         }
-    }
-    
-    post {
-        always {
-            echo 'Pipeline finalizada!'
+
+        // Restore da aplicação
+        stage('Restore App') {
+            steps {
+                script {
+                    def workspace = pwd()
+                    sh "dotnet restore ${workspace}/RestauranteFinal.sln"
+                }
+                echo "Restored App"
+            }
         }
-        success {
-            echo 'Análise do SonarQube concluída com sucesso!'
+
+        // Build da aplicação
+        stage('Build App') {
+            steps {
+                script {
+                    def workspace = pwd()
+                    sh "dotnet build ${workspace}/RestauranteFinal.sln --configuration Release"
+                }
+                echo "Built App"
+            }
         }
-        failure {
-            echo 'Falha na execução da análise do SonarQube.'
+
+        // Publish da aplicação
+        stage('Publish App') {
+            steps {
+                script {
+                    def workspace = pwd()
+                    sh "dotnet publish ${workspace}/RestauranteFinal.sln --configuration Release --output ${workspace}/publish"
+                }
+                echo "Published App"
+            }
         }
     }
 }
