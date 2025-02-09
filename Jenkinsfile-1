@@ -1,68 +1,56 @@
 pipeline {
     agent any
-
+    
     environment {
-        DOCKER_IMAGE = "restaurante-api"
+        // Token global do SonarQube (deve ser configurado no Jenkins como um secret)
+        SONAR_TOKEN = credentials('sonarqube-token-3')  // Substitua 'sonarqube-token-3' pelo ID do seu secret no Jenkins
+        SONAR_HOST_URL = 'http://192.168.56.1:9000'  // Substitua pela URL do seu servidor SonarQube
     }
-
+    
     stages {
-        stage('Checkout do Código') {
+        stage('Prepare SonarQube Scanner') {
             steps {
-                git branch: 'main', url: 'https://github.com/Marcelok7/ctesp2425-final-g3f.git'
-            }
-        }
-
-        stage('Restaurar Pacotes') {
-            steps {
-                sh 'dotnet restore'
-            }
-        }
-
-        stage('Compilação e Testes') {
-            steps {
-                sh 'dotnet build --configuration Release'
-                sh 'dotnet test --configuration Release --logger "trx;LogFileName=test-results.trx"'
-            }
-            post {
-                always {
-                    // Publicar resultados dos testes
-                    junit '/*/test-results.trx'
+                script {
+                    // Configuração do SonarQube Scanner
+                    def scannerHome = tool name: 'SonarQube Scanner', type: 'Tool'
+                    
+                    // Configurações de autenticação e definição de variáveis de ambiente
+                    env.SONAR_SCANNER_HOME = scannerHome
+                    env.SONAR_TOKEN = credentials('sonarqube-token-3')
+                    env.SONAR_HOST_URL = 'http://192.168.56.1:9000'
                 }
             }
         }
-
-        stage('Análise de Qualidade com SonarQube') {
+        
+        stage('Run SonarQube Scanner') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh 'dotnet sonarscanner begin /k:"restaurante-api" /d:sonar.login="${SONARQUBE_TOKEN}"'
-                    sh 'dotnet build'
-                    sh 'dotnet sonarscanner end /d:sonar.login="${SONARQUBE_TOKEN}"'
+                script {
+                    // Executar o SonarQube Scanner com as propriedades fornecidas
+                    sh """
+                        ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                            -Dsonar.projectKey=restaurante-api-3 \
+                            -Dsonar.projectName=restaurante-api-3 \
+                            -Dsonar.projectVersion=1.0 \
+                            -Dsonar.language=cs \
+                            -Dsonar.tests=RestauranteFinal/RestauranteTestes/ \
+                            -Dsonar.sources=RestauranteFinal/RestauranteFinal/ \
+                            -Dsonar.login=${SONAR_TOKEN} \
+                            -Dsonar.host.url=${SONAR_HOST_URL}
+                    """
                 }
-            }
-        }
-
-        stage('Construção da Imagem Docker') {
-            steps {
-                sh 'docker build -t $DOCKER_IMAGE .'
-            }
-        }
-
-        stage('Deploy com Docker') {
-            steps {
-                sh '''
-                docker-compose down
-                docker-compose up -d
-                '''
             }
         }
     }
-
+    
     post {
+        always {
+            echo 'Pipeline finalizada!'
+        }
         success {
-            echo 'Pipeline executado com sucesso!'
+            echo 'Análise do SonarQube concluída com sucesso!'
         }
         failure {
-            echo 'Erro no pipeline!'
+            echo 'Falha na execução da análise do SonarQube.'
         }
     }
 }
