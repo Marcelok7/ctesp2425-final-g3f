@@ -1,47 +1,46 @@
 pipeline {
     agent any
-    
+
     environment {
-        // Token global do SonarQube (deve ser configurado no Jenkins como um secret)
-        SONAR_TOKEN = credentials('sonarqube-token-3')  // Substitua 'sonarqube-token-3' pelo ID do seu secret no Jenkins
         SONAR_HOST_URL = 'http://192.168.56.1:9000'  // Substitua pela URL do seu servidor SonarQube
     }
-    
+
     stages {
         stage('Prepare SonarQube Scanner') {
             steps {
                 script {
                     // Configuração do SonarQube Scanner
-                    def scannerHome = tool name: 'SonarQube Scanner', type: 'Tool'
-                    
-                    // Configurações de autenticação e definição de variáveis de ambiente
+                    def scannerHome = tool name: 'SonarQube Scanner for Jenkins', type: 'Plugin'
+
+                    // Definindo a variável do scanner no ambiente
                     env.SONAR_SCANNER_HOME = scannerHome
-                    env.SONAR_TOKEN = credentials('sonarqube-token-3')
-                    env.SONAR_HOST_URL = 'http://192.168.56.1:9000'
                 }
             }
         }
-        
+
         stage('Run SonarQube Scanner') {
             steps {
                 script {
-                    // Executar o SonarQube Scanner com as propriedades fornecidas
-                    sh """
-                        ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
-                            -Dsonar.projectKey=restaurante-api-3 \
-                            -Dsonar.projectName=restaurante-api-3 \
-                            -Dsonar.projectVersion=1.0 \
-                            -Dsonar.language=cs \
-                            -Dsonar.tests=RestauranteFinal/RestauranteTestes/ \
-                            -Dsonar.sources=RestauranteFinal/RestauranteFinal/ \
-                            -Dsonar.login=${SONAR_TOKEN} \
-                            -Dsonar.host.url=${SONAR_HOST_URL}
-                    """
+                    // Usando as credenciais corretamente
+                    withCredentials([string(credentialsId: 'sonarqube-token-3', variable: 'SONAR_TOKEN')]) {
+                        // Executar o SonarQube Scanner com as propriedades fornecidas
+                        sh """
+                            ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                                -Dsonar.projectKey=restaurante-api-3 \
+                                -Dsonar.projectName=restaurante-api-3 \
+                                -Dsonar.projectVersion=1.0 \
+                                -Dsonar.language=cs \
+                                -Dsonar.tests=RestauranteFinal/RestauranteTestes/ \
+                                -Dsonar.sources=RestauranteFinal/RestauranteFinal/ \
+                                -Dsonar.login=${SONAR_TOKEN} \
+                                -Dsonar.host.url=${SONAR_HOST_URL}
+                        """
+                    }
                 }
             }
         }
     }
-    
+
     post {
         always {
             echo 'Pipeline finalizada!'
